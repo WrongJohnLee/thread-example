@@ -1,5 +1,7 @@
 package arrayblockqueue;
 
+import org.junit.Test;
+
 public class ArrayQueueTest {
 
     @org.junit.Test
@@ -22,7 +24,7 @@ public class ArrayQueueTest {
             long start = System.currentTimeMillis();
             stringArrayQueue.put(1);
             long end = System.currentTimeMillis() - start;
-            System.out.println("wait to put"+end);
+            System.out.println("wait to put" + end);
         }).start();
 
         //模拟消费场景
@@ -34,7 +36,7 @@ public class ArrayQueueTest {
 
         //消费了队列有空间，会通知等待fullLock的put线程进行put操作
         new Thread(() -> {
-            System.out.println(Thread.currentThread().getName()+"消费："+ stringArrayQueue.get());
+            System.out.println(Thread.currentThread().getName() + "消费：" + stringArrayQueue.get());
         }).start();
     }
 
@@ -46,23 +48,23 @@ public class ArrayQueueTest {
         stringArrayQueue.put(3);
 
         new Thread(() -> {
-            System.out.println(Thread.currentThread()+" get : "+stringArrayQueue.get());
+            System.out.println(Thread.currentThread() + " get : " + stringArrayQueue.get());
         }).start();
 
         new Thread(() -> {
-            System.out.println(Thread.currentThread()+" get : "+stringArrayQueue.get());
+            System.out.println(Thread.currentThread() + " get : " + stringArrayQueue.get());
         }).start();
 
         new Thread(() -> {
-            System.out.println(Thread.currentThread()+" get : "+stringArrayQueue.get());
+            System.out.println(Thread.currentThread() + " get : " + stringArrayQueue.get());
         }).start();
 
         //队列已空，需要等待生产，通知等待emptyLock的线程去消费
         new Thread(() -> {
             long start = System.currentTimeMillis();
-            System.out.println(Thread.currentThread()+" get : "+stringArrayQueue.get());
+            System.out.println(Thread.currentThread() + " get : " + stringArrayQueue.get());
             long end = System.currentTimeMillis() - start;
-            System.out.println("wait to get"+end);
+            System.out.println("wait to get" + end);
         }).start();
 
         //模拟生产时间
@@ -87,5 +89,52 @@ public class ArrayQueueTest {
             System.out.println(Thread.currentThread().getName()+"消费："+ stringArrayQueue.get());
         }).start();*/
 
+    }
+
+    @Test
+    public void concurrentPutThenGet() throws InterruptedException {
+        ArrayQueue<Integer> queue = new ArrayQueue<>(299);
+
+        Thread t1 = new Thread(
+                () -> {
+                    for (int i = 0; i < 100; i++) {
+                        queue.put(i);
+                    }
+                }
+        );
+
+        Thread t2 = new Thread(
+                () -> {
+                    for (int i = 0; i < 100; i++) {
+                        queue.put(i);
+                    }
+                }
+        );
+
+        Thread t3 = new Thread(
+                () -> {
+                    for (int i = 0; i < 100; i++) {
+                        queue.put(i);
+                    }
+                }
+        );
+
+        Thread t4 = new Thread(
+                () -> {
+                    System.out.println("==========" + queue.get());
+                }
+
+        );
+
+        t1.start();
+        t2.start();
+        t3.start();
+        t4.start();
+
+        t1.join();
+        t2.join();
+        t3.join();
+
+        System.out.println("========= size :" + queue.getCount());
     }
 }
