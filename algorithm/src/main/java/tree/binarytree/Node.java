@@ -32,4 +32,13 @@ public class Node<T> {
     public void setRightChild(Node<T> rightChild) {
         this.rightChild = rightChild;
     }
+
+    @Override
+    public String toString() {
+        return "Node{" +
+                "data=" + data +
+                ", leftChild=" + leftChild +
+                ", rightChild=" + rightChild +
+                '}';
+    }
 }

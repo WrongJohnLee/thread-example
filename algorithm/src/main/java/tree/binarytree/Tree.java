@@ -6,9 +6,13 @@ package tree.binarytree;
  */
 public interface Tree<T>  {
 
-    void insert(T t);
+    boolean insert(T t);
 
-    Node find(T t);
+    Node<T> find(T t);
+
+    Node<T> findMax();
+
+    Node<T> findMin();
 
     boolean delete(T t);
 }
