@@ -4,6 +4,7 @@ import org.junit.Test;
 
 import java.io.*;
 import java.nio.ByteBuffer;
+import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 
@@ -44,18 +45,19 @@ public class NormalAndNioReadTest {
 
 
     /**
-     * NIO通过管道、缓冲的方式处理IO
+     * NIO通过通道、缓冲的方式处理IO
      * 支持读写双向操作
      */
-    public static void main(String[] args) {
+    @Test
+    public void NIOReadAndWriteTest() {
         //获取文件的读写模式，mode支持只读(r)、只写(w)、读写(rw)
         try {
             RandomAccessFile file = new RandomAccessFile("/home/i999/IdeaProjects/thread-example/io/src/test.txt", "rw");
-            //获取管道
+            //获取通道
             FileChannel channel = file.getChannel();
             //申请指定大小的内存空间，默认是堆内存。还可以allocateDirect直接内存（堆外内存）
             ByteBuffer buf = ByteBuffer.allocate(1024);
-            //管道读取到缓冲区，并设置将buf的大小刷新
+            //通道读取到缓冲区，并设置将buf的大小刷新
             long dataSize = channel.read(buf);
             while (dataSize != -1) {
                 //确定缓冲区数据的起始点和终止点，为输出数据做准备(即写入通道)。此时：limit = position，position = 0。
@@ -69,11 +71,28 @@ public class NormalAndNioReadTest {
                 //读新数据到缓冲区，ByteBuffer.put()，并将buf容量设置
                 dataSize = channel.read(buf);
             }
-            //可以在管道中直接写入
+            //可以在通道中直接写入
 //            new Thread(new FileWriteRunner(channel)).start();
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * 内存映射拷贝文件
+     * 如果是大文件，效率会非常高
+     * @link MappedByteBuffer
+     */
+    @Test
+    public void NIOMapperByteBufTest() throws IOException {
+        File in = new File("src/in.txt");
+        File out = new File("src/out.txt");
+        FileChannel inChannel = new FileInputStream(in).getChannel();
+        FileChannel outChannel = new FileOutputStream(out).getChannel();
+        MappedByteBuffer mappedByteBuffer = inChannel.map(FileChannel.MapMode.READ_ONLY, 0, inChannel.size());
+        outChannel.write(mappedByteBuffer);
+        mappedByteBuffer.clear();
+        //finally close
     }
 
 
@@ -90,7 +109,9 @@ public class NormalAndNioReadTest {
             while (true) {
                 loopSize++;
                 try {
+                    //需要转成字节码
                     ByteBuffer writeByteBuf = Charset.forName("utf8").encode(String.format("第%s次写入666",loopSize));
+                    //写入通道
                     channel.write(writeByteBuf);
                 } catch (IOException e) {
                     e.printStackTrace();
