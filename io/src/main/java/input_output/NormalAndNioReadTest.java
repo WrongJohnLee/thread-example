@@ -9,6 +9,10 @@ import java.nio.charset.Charset;
 
 /**
  * 传统io与nio
+ * <p>
+ *     NIO各个类概念
+ *     https://www.cnblogs.com/fwnboke/p/8529604.html
+ * </p>
  */
 public class NormalAndNioReadTest {
 
@@ -44,24 +48,25 @@ public class NormalAndNioReadTest {
      * 支持读写双向操作
      */
     public static void main(String[] args) {
-        //获取文件的读写模式，mode支持只读、只写、读写
+        //获取文件的读写模式，mode支持只读(r)、只写(w)、读写(rw)
         try {
             RandomAccessFile file = new RandomAccessFile("/home/i999/IdeaProjects/thread-example/io/src/test.txt", "rw");
-            //获取通道
+            //获取管道
             FileChannel channel = file.getChannel();
-            //申请直接内存
+            //申请指定大小的内存空间，默认是堆内存。还可以allocateDirect直接内存（堆外内存）
             ByteBuffer buf = ByteBuffer.allocate(1024);
-            //管道读取到缓冲区
+            //管道读取到缓冲区，并设置将buf的大小刷新
             long dataSize = channel.read(buf);
             while (dataSize != -1) {
-                //设置缓冲区的limit、容量大小
+                //确定缓冲区数据的起始点和终止点，为输出数据做准备(即写入通道)。此时：limit = position，position = 0。
                 buf.flip();
                 while (buf.hasRemaining()) {
+                    //get的方式，将当前位置标记向前一位
                     System.out.println((char)buf.get());
                 }
-                //清除缓冲区，设置从0开始
+                //缓冲区初始化，准备再次接收新数据到缓冲区。position = 0，limit = capacity。
                 buf.clear();
-                //读新数据到缓冲区
+                //读新数据到缓冲区，ByteBuffer.put()，并将buf容量设置
                 dataSize = channel.read(buf);
             }
             //可以在管道中直接写入
