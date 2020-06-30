@@ -1,4 +1,4 @@
-package writereadlock;
+package lock.writereadlock;
 
 /**
  * 乞丐版读写锁

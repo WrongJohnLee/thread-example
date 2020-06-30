@@ -1,4 +1,4 @@
-package reentrantLock;
+package lock.reentrantLock;
 
 import org.junit.Test;
 

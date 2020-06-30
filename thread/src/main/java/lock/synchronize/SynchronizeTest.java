@@ -1,4 +1,4 @@
-package synchronize;
+package lock.synchronize;
 
 /**
  * 多线程竞争，拿到锁后，进入monitorenter，其他线程进入AQS等待，

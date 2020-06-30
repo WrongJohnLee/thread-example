@@ -1,4 +1,4 @@
-package writereadlock;
+package lock.writereadlock;
 
 import org.junit.Test;
 
