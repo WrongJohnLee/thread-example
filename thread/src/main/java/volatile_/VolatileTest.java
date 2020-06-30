@@ -2,10 +2,29 @@ package volatile_;
 
 import org.junit.Test;
 
+/**
+ * Volatile适用于一写多读的场景
+ * 保持数据的可见性
+ * 对于多写多读保证不了线程安全（操作依赖于当前值）
+ */
 public class VolatileTest {
-    private volatile static int i = 0;
+    private static volatile int i = 0;
 
-    public static void main(String[] args) throws InterruptedException {
+    static class Monitor{
+        // 即时可见
+        volatile boolean shutdownRequested;
+
+        public void shutdown() { shutdownRequested = true; }
+
+        public void doWork() {
+            while (!shutdownRequested) {
+                // do stuff
+            }
+        }
+    }
+
+    @Test
+    public void moreWriteTest() throws InterruptedException {
         Thread t1 = new Thread(() -> {
             for (int j = 0; j < 10000; j++) {
                 i += 1;
@@ -20,13 +39,14 @@ public class VolatileTest {
 
         t1.start();
 
-        t1.join();
         t2.start();
+        t1.join();
         t2.join();
+        // 最终肯定小于20000，多线程写，volatile保证不了线程安全
         System.out.println(i);
-
-
     }
+
+
 
     @Test
     public void testRepeatSort() {
